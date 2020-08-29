@@ -1,0 +1,154 @@
+﻿INFRA [root@hctjwqk8snginx01 conf.d]# kubectl get sts/uat-rabbitmq -n rabbitmq -o yaml
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1beta1","kind":"StatefulSet","metadata":{"annotations":{},"name":"uat-rabbitmq","namespace":"rabbitmq"},"spec":{"replicas":2,"serviceName":"uat-rabbitmq","template":{"metadata":{"labels":{"app":"uat-rabbitmq"}},"spec":{"containers":[{"env":[{"name":"MY_POD_IP","valueFrom":{"fieldRef":{"fieldPath":"status.podIP"}}},{"name":"MY_POD_HOSTNAME","valueFrom":{"fieldRef":{"fieldPath":"metadata.name"}}},{"name":"RABBITMQ_USE_LONGNAME","value":"false"},{"name":"RABBITMQ_NODENAME","value":"rabbit@$(MY_POD_HOSTNAME)"},{"name":"RABBITMQ_ERLANG_COOKIE","value":"RabbitmqForNgw"},{"name":"RABBITMQ_LOGS","value":"/var/log/rabbitmq/rabbitmq.log"},{"name":"RABBITMQ_SASL_LOGS","value":"/var/log/rabbitmq/rabbitmq-sasl.log"}],"image":"harbor.homecredit.cn/hcc/rabbitmq:3.7.4-management-alpine","imagePullPolicy":"Always","lifecycle":{"postStart":{"exec":{"command":["/bin/sh","-c","sed \"s/^search \\([^ ]\\+\\)/search uat-rabbitmq.\\1 \\1/\" /etc/resolv.conf \u003e /etc/resolv.conf.new; cat /etc/resolv.conf.new \u003e /etc/resolv.conf;\n"]}}},"livenessProbe":{"exec":{"command":["rabbitmqctl","status"]},"initialDelaySeconds":30,"timeoutSeconds":10},"name":"rabbitmq-k8s","ports":[{"containerPort":15672,"name":"http","protocol":"TCP"},{"containerPort":5672,"name":"amqp","protocol":"TCP"}],"readinessProbe":{"exec":{"command":["rabbitmqctl","status"]},"initialDelaySeconds":10,"timeoutSeconds":10},"resources":{"limits":{"cpu":"4.0","memory":"8Gi"},"requests":{"cpu":"1.0","memory":"4Gi"}},"volumeMounts":[{"mountPath":"/etc/rabbitmq","name":"config-volume"},{"mountPath":"/var/lib/rabbitmq","name":"rabbitmq-data"},{"mountPath":"/var/log/rabbitmq","name":"rabbitmq-log"}]}],"imagePullSecrets":[{"name":"registrykey"}],"nodeSelector":{"type":"app"},"serviceAccountName":"uat-rabbitmq","terminationGracePeriodSeconds":10,"volumes":[{"configMap":{"items":[{"key":"rabbitmq.conf","path":"rabbitmq.conf"},{"key":"enabled_plugins","path":"enabled_plugins"}],"name":"uat-rabbitmq-config"},"name":"config-volume"}]}},"volumeClaimTemplates":[{"metadata":{"annotations":{"volume.beta.kubernetes.io/storage-class":"managed-nfs-storage"},"name":"rabbitmq-data"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"40Gi"}}}},{"metadata":{"annotations":{"volume.beta.kubernetes.io/storage-class":"managed-nfs-storage"},"name":"rabbitmq-log"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"40Gi"}}}}]}}
+  creationTimestamp: 2019-04-23T03:45:17Z
+  generation: 6
+  labels:
+    app: uat-rabbitmq
+  name: uat-rabbitmq
+  namespace: rabbitmq
+  resourceVersion: "169093686"
+  selfLink: /apis/apps/v1beta1/namespaces/rabbitmq/statefulsets/uat-rabbitmq
+  uid: 35adc5ba-657a-11e9-a05d-005056aed685
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: uat-rabbitmq
+  serviceName: uat-rabbitmq
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: uat-rabbitmq
+    spec:
+      containers:
+      - env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: MY_POD_HOSTNAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: RABBITMQ_USE_LONGNAME
+          value: "false"
+        - name: RABBITMQ_NODENAME
+          value: rabbit@$(MY_POD_HOSTNAME)
+        - name: RABBITMQ_ERLANG_COOKIE
+          value: RabbitmqForNgw
+        - name: RABBITMQ_LOGS
+          value: /var/log/rabbitmq/rabbitmq.log
+        - name: RABBITMQ_SASL_LOGS
+          value: /var/log/rabbitmq/rabbitmq-sasl.log
+        image: harbor.homecredit.cn/hcc/rabbitmq:3.7.4-management-alpine
+        imagePullPolicy: Always
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - |
+                sed "s/^search \([^ ]\+\)/search uat-rabbitmq.\1 \1/" /etc/resolv.conf > /etc/resolv.conf.new; cat /etc/resolv.conf.new > /etc/resolv.conf;
+        name: rabbitmq-k8s
+        ports:
+        - containerPort: 15672
+          name: http
+          protocol: TCP
+        - containerPort: 5672
+          name: amqp
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - rabbitmqctl
+            - status
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/rabbitmq
+          name: config-volume
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-data
+        - mountPath: /var/log/rabbitmq
+          name: rabbitmq-log
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: registrykey
+      nodeSelector:
+        type: app
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: uat-rabbitmq
+      serviceAccountName: uat-rabbitmq
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: rabbitmq.conf
+            path: rabbitmq.conf
+          - key: enabled_plugins
+            path: enabled_plugins
+          name: uat-rabbitmq-config
+        name: config-volume
+  updateStrategy:
+    type: OnDelete
+  volumeClaimTemplates:
+  - metadata:
+      annotations:
+        volume.beta.kubernetes.io/storage-class: managed-nfs-storage
+      creationTimestamp: null
+      name: rabbitmq-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 40Gi
+    status:
+      phase: Pending
+  - metadata:
+      annotations:
+        volume.beta.kubernetes.io/storage-class: managed-nfs-storage
+      creationTimestamp: null
+      name: rabbitmq-log
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 40Gi
+    status:
+      phase: Pending
+status:
+  collisionCount: 0
+  currentRevision: uat-rabbitmq-ff88c9ff6
+  observedGeneration: 6
+  readyReplicas: 2
+  replicas: 2
+  updateRevision: uat-rabbitmq-6df9fc8544
+  updatedReplicas: 2
