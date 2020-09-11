@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/8/28 15:35
-# @Author  : Jackxia
+# @Author  : 
 import ldap3
 
 def check_login(user, password):
@@ -25,7 +25,6 @@ if __name__ == '__main__':
     # passwd = 'xxx'
     # bind_dn = 'CN=xxx,OU=Local Service,OU=CN,DC=xxx,DC=xxx'
     # conn = ldap3.Connection(ldap3.Server(ldaphost), bind_dn, passwd, auto_bind=True)
-    # # groupname = 'CN.D.linux'
     # # search_filter = '(cn={})'.format(groupname)
     # search_filter = '(sAMAccountName=xxx)'
     # search_base = 'OU=Users,OU=CN,DC=xxx,DC=xxxxxx,DC=net'
